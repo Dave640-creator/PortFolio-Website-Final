@@ -300,8 +300,13 @@ function initContactForm() {
       return;
     }
 
+    // No Formspree endpoint set up yet — fall back to opening the visitor's
+    // own email client with everything pre-filled, so the form still works.
     if (FORMSPREE_ENDPOINT.includes('YOUR_FORM_ID')) {
-      showMsg('error', '⚠ Contact form not connected yet — see FORMSPREE_ENDPOINT in script.js.');
+      const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`);
+      const mailSubject = encodeURIComponent(subject || `Message from ${name}`);
+      window.location.href = `mailto:beloylausa@gmail.com?subject=${mailSubject}&body=${body}`;
+      showMsg('success', '✓ Opening your email app to send this message…');
       return;
     }
 
@@ -663,10 +668,7 @@ function initProjectModal() {
     if (e.key === 'Escape' && modal.classList.contains('open')) close();
   });
 
-  document.querySelectorAll('.pc-details-btn').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      const card = btn.closest('.project-card');
+  const openProjectModal = (card) => {
       if (!card) return;
 
       const title = card.dataset.title || card.querySelector('h3')?.textContent || '';
@@ -708,6 +710,22 @@ function initProjectModal() {
       }
 
       modal.classList.add('open');
+  };
+
+  document.querySelectorAll('.pc-details-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      openProjectModal(btn.closest('.project-card'));
+    });
+  });
+
+  // Whole card is clickable — but not when clicking a link/button inside it
+  // (GitHub icon, screenshot expand, carousel dots, etc.)
+  document.querySelectorAll('.project-card').forEach(card => {
+    card.classList.add('pc-clickable');
+    card.addEventListener('click', e => {
+      if (e.target.closest('a, button, .pc-shots-dots span')) return;
+      openProjectModal(card);
     });
   });
 
