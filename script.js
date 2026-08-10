@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initNav();
   initTyped();
   initHeroTilt();
+  initProjectsCarousel();
   initProjectTilt();
   initScrollReveal();
   initSkillBars();
@@ -60,23 +61,38 @@ function initLoader() {
   loader.id = 'loader';
   loader.className = [reduced && 'intro-reduced', skip && 'intro-skip'].filter(Boolean).join(' ');
   loader.innerHTML = `
+    <div class="intro-particles">${Array.from({length: 14}).map((_, i) =>
+      `<span style="--pd:${(2.6 + Math.random() * 2.2).toFixed(2)}s; --px:${Math.round((Math.random() - .5) * 260)}px; --pdelay:${(Math.random() * 2).toFixed(2)}s; left:${Math.round(Math.random() * 100)}%; top:${Math.round(Math.random() * 100)}%;"></span>`
+    ).join('')}</div>
     <div class="intro-content">
       <div class="intro-glow"></div>
       <div class="intro-ring"></div>
+      <div class="intro-ring intro-ring-2"></div>
       <div class="intro-icons">${iconsHTML}</div>
       <div class="intro-name"><span class="intro-name-text">Dave B. Lausa</span></div>
+      <div class="intro-tagline"><span class="intro-tagline-text">BSIT Student &middot; Full-Stack Developer</span></div>
     </div>
+    <div class="intro-progress"><div class="intro-progress-bar"></div></div>
   `;
   document.body.prepend(loader);
 
   try { sessionStorage.setItem('introPlayed', '1'); } catch (e) {}
 
   const exitAt = (reduced || skip) ? 50 : 4500;
-  const removeAfter = (reduced || skip) ? 50 : 450;
+  const removeAfter = (reduced || skip) ? 50 : 550;
+
+  if (!reduced && !skip) {
+    const bar = loader.querySelector('.intro-progress-bar');
+    if (bar) bar.style.transitionDuration = exitAt + 'ms';
+    requestAnimationFrame(() => { if (bar) bar.style.width = '100%'; });
+  }
 
   setTimeout(() => {
-    loader.classList.add('hidden');
-    setTimeout(() => loader.remove(), removeAfter);
+    loader.classList.add('exiting');
+    setTimeout(() => {
+      loader.classList.add('hidden');
+      setTimeout(() => loader.remove(), removeAfter);
+    }, 150);
   }, exitAt);
 }
 
@@ -188,7 +204,7 @@ function initHeroTilt() {
     const rotY =  x * MAX;
 
     card.style.transform = `perspective(800px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale(1.04)`;
-    card.style.boxShadow = `${-rotY * 1.5}px ${rotX * 1.5}px 50px rgba(0,0,0,.5), 0 0 60px rgba(0,212,255,.15)`;
+    card.style.boxShadow = `${-rotY * 1.5}px ${rotX * 1.5}px 50px rgba(0,0,0,.5), 0 0 60px rgba(82,106,163,.15)`;
   });
 
   wrap.addEventListener('mouseleave', () => {
@@ -198,34 +214,92 @@ function initHeroTilt() {
 }
 
 // ─────────────────────────────────────────────────────
+// PROJECTS — horizontal auto-scrolling loop carousel
+// ─────────────────────────────────────────────────────
+function initProjectsCarousel() {
+  const carousel = document.getElementById('projectsCarousel');
+  const track = document.getElementById('projectsTrack');
+  if (!carousel || !track) return;
+
+  // Duplicate every card once so the strip can loop seamlessly.
+  const originalCards = Array.from(track.children);
+  originalCards.forEach(card => {
+    const clone = card.cloneNode(true);
+    clone.removeAttribute('data-aos');
+    clone.removeAttribute('data-aos-delay');
+    clone.setAttribute('aria-hidden', 'true');
+    track.appendChild(clone);
+  });
+
+  let halfWidth = 0;
+  const measure = () => { halfWidth = track.scrollWidth / 2; };
+  measure();
+  window.addEventListener('resize', measure);
+
+  let paused = false;
+  let userInteracting = false;
+  const SPEED = 0.5; // px per frame, ~30px/sec at 60fps
+
+  function step() {
+    if (!paused && !userInteracting && halfWidth > 0) {
+      carousel.scrollLeft += SPEED;
+      if (carousel.scrollLeft >= halfWidth) {
+        carousel.scrollLeft -= halfWidth;
+      }
+    }
+    requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+
+  // Pause the auto-loop while the visitor is hovering, touching, or scrolling manually
+  carousel.addEventListener('mouseenter', () => paused = true);
+  carousel.addEventListener('mouseleave', () => paused = false);
+  carousel.addEventListener('touchstart', () => paused = true, { passive: true });
+  carousel.addEventListener('touchend', () => setTimeout(() => paused = false, 1500), { passive: true });
+
+  // Click-and-drag scrolling for desktop users
+  let isDown = false, startX = 0, startScroll = 0;
+  carousel.addEventListener('mousedown', e => {
+    isDown = true;
+    userInteracting = true;
+    startX = e.pageX;
+    startScroll = carousel.scrollLeft;
+  });
+  window.addEventListener('mouseup', () => {
+    isDown = false;
+    setTimeout(() => userInteracting = false, 800);
+  });
+  window.addEventListener('mousemove', e => {
+    if (!isDown) return;
+    e.preventDefault();
+    carousel.scrollLeft = startScroll - (e.pageX - startX);
+  });
+
+  // Keep the loop seamless after any manual scroll (wheel, trackpad, drag)
+  carousel.addEventListener('scroll', () => {
+    if (halfWidth <= 0) return;
+    if (carousel.scrollLeft >= halfWidth) carousel.scrollLeft -= halfWidth;
+    else if (carousel.scrollLeft < 0) carousel.scrollLeft += halfWidth;
+  });
+
+  // Left/right arrow buttons
+  const arrowLeft = document.getElementById('projectsArrowLeft');
+  const arrowRight = document.getElementById('projectsArrowRight');
+  const nudge = (dir) => {
+    userInteracting = true;
+    carousel.scrollBy({ left: dir * 340, behavior: 'smooth' });
+    setTimeout(() => userInteracting = false, 900);
+  };
+  if (arrowLeft) arrowLeft.addEventListener('click', () => nudge(-1));
+  if (arrowRight) arrowRight.addEventListener('click', () => nudge(1));
+}
+
+// ─────────────────────────────────────────────────────
 // PROJECT CARDS — 3D TILT
 // ─────────────────────────────────────────────────────
 function initProjectTilt() {
-  document.querySelectorAll('.tilt-card').forEach(card => {
-    const MAX = 12;
-
-    card.addEventListener('mousemove', e => {
-      const r    = card.getBoundingClientRect();
-      const x    = (e.clientX - r.left) / r.width  - .5;
-      const y    = (e.clientY - r.top)  / r.height - .5;
-      const rotX = -y * MAX;
-      const rotY =  x * MAX;
-
-      card.style.transform = `perspective(600px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateZ(8px)`;
-
-      // Move shine
-      const shine = card.querySelector('.pc-shine');
-      if (shine) {
-        shine.style.background = `radial-gradient(circle at ${(x + .5) * 100}% ${(y + .5) * 100}%, rgba(255,255,255,.08), transparent 60%)`;
-      }
-    });
-
-    card.addEventListener('mouseleave', () => {
-      card.style.transform = '';
-      const shine = card.querySelector('.pc-shine');
-      if (shine) shine.style.background = '';
-    });
-  });
+  // Mouse-follow 3D tilt removed per feedback — cards now use a simple
+  // CSS-only hover lift (see .tilt-card:hover in style.css) instead.
 }
 
 // ─────────────────────────────────────────────────────
@@ -387,8 +461,8 @@ function initAvatarFallback() {
 
       // Gradient bg
       const grad = ctx.createLinearGradient(0, 0, 200, 200);
-      grad.addColorStop(0, '#00d4ff');
-      grad.addColorStop(1, '#7b2fff');
+      grad.addColorStop(0, '#526aa3');
+      grad.addColorStop(1, '#64748b');
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, 200, 200);
 
@@ -724,7 +798,7 @@ function initProjectModal() {
   document.querySelectorAll('.project-card').forEach(card => {
     card.classList.add('pc-clickable');
     card.addEventListener('click', e => {
-      if (e.target.closest('a, button, .pc-shots-dots span')) return;
+      if (e.target.closest('a, button, .pc-shots-dots span, .pc-shots')) return;
       openProjectModal(card);
     });
   });
