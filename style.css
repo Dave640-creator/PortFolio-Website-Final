@@ -954,7 +954,7 @@ a { text-decoration: none; color: inherit; }
 #loader {
   position: fixed;
   inset: 0;
-  background: #f8f9fc;
+  background: #0a0a0a;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1135,7 +1135,7 @@ a { text-decoration: none; color: inherit; }
   letter-spacing: .01em;
   opacity: 0;
   filter: blur(10px);
-  color: #14141f;
+  color: #fff;
   transform: scale(1.2);
   animation: intro-name-in 700ms cubic-bezier(.22,1,.36,1) 2400ms forwards;
 }
@@ -1180,7 +1180,7 @@ a { text-decoration: none; color: inherit; }
   transform: translateX(-50%);
   width: 160px; height: 2px;
   border-radius: 100px;
-  background: rgba(20,20,31,.1);
+  background: rgba(255,255,255,.08);
   overflow: hidden;
   opacity: 0;
   animation: intro-progress-wrap-in 500ms ease-out 200ms forwards;
