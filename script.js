@@ -61,38 +61,23 @@ function initLoader() {
   loader.id = 'loader';
   loader.className = [reduced && 'intro-reduced', skip && 'intro-skip'].filter(Boolean).join(' ');
   loader.innerHTML = `
-    <div class="intro-particles">${Array.from({length: 14}).map((_, i) =>
-      `<span style="--pd:${(2.6 + Math.random() * 2.2).toFixed(2)}s; --px:${Math.round((Math.random() - .5) * 260)}px; --pdelay:${(Math.random() * 2).toFixed(2)}s; left:${Math.round(Math.random() * 100)}%; top:${Math.round(Math.random() * 100)}%;"></span>`
-    ).join('')}</div>
     <div class="intro-content">
       <div class="intro-glow"></div>
       <div class="intro-ring"></div>
-      <div class="intro-ring intro-ring-2"></div>
       <div class="intro-icons">${iconsHTML}</div>
       <div class="intro-name"><span class="intro-name-text">Dave B. Lausa</span></div>
-      <div class="intro-tagline"><span class="intro-tagline-text">BSIT Student &middot; Full-Stack Developer</span></div>
     </div>
-    <div class="intro-progress"><div class="intro-progress-bar"></div></div>
   `;
   document.body.prepend(loader);
 
   try { sessionStorage.setItem('introPlayed', '1'); } catch (e) {}
 
   const exitAt = (reduced || skip) ? 50 : 4500;
-  const removeAfter = (reduced || skip) ? 50 : 550;
-
-  if (!reduced && !skip) {
-    const bar = loader.querySelector('.intro-progress-bar');
-    if (bar) bar.style.transitionDuration = exitAt + 'ms';
-    requestAnimationFrame(() => { if (bar) bar.style.width = '100%'; });
-  }
+  const removeAfter = (reduced || skip) ? 50 : 450;
 
   setTimeout(() => {
-    loader.classList.add('exiting');
-    setTimeout(() => {
-      loader.classList.add('hidden');
-      setTimeout(() => loader.remove(), removeAfter);
-    }, 150);
+    loader.classList.add('hidden');
+    setTimeout(() => loader.remove(), removeAfter);
   }, exitAt);
 }
 

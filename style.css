@@ -961,45 +961,12 @@ a { text-decoration: none; color: inherit; }
   justify-content: center;
   z-index: 9999;
   overflow: hidden;
-  transition: opacity .5s cubic-bezier(.4,0,.2,1), transform .5s cubic-bezier(.4,0,.2,1), filter .5s ease;
+  transition: opacity .4s ease, transform .4s ease;
 }
-#loader.exiting .intro-icon-wrap {
-  transition: transform .5s cubic-bezier(.4,0,.2,1), opacity .45s ease;
-  transform: translate(calc(-50% + (var(--ix) * 2.2)), calc(-50% + var(--iy) - 60px)) scale(.4) !important;
-  opacity: 0 !important;
-}
-#loader.exiting .intro-name-text,
-#loader.exiting .intro-tagline-text {
-  transition: opacity .35s ease, filter .35s ease, transform .35s ease;
-  opacity: 0;
-  filter: blur(6px);
-  transform: translateY(-6px);
-}
-#loader.exiting .intro-glow,
-#loader.exiting .intro-ring { transition: opacity .35s ease; opacity: 0; }
 #loader.hidden {
   opacity: 0;
-  transform: scale(1.06);
-  filter: blur(4px);
+  transform: scale(1.05);
   pointer-events: none;
-}
-
-/* Ambient drifting particles for depth */
-.intro-particles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
-.intro-particles span {
-  position: absolute;
-  width: 3px; height: 3px;
-  border-radius: 50%;
-  background: rgba(92,124,250,.55);
-  opacity: 0;
-  animation: intro-particle-drift var(--pd, 3s) ease-in-out var(--pdelay, 0s) infinite;
-}
-@keyframes intro-particle-drift {
-  0%   { opacity: 0; transform: translateY(18px) translateX(0); }
-  15%  { opacity: .65; }
-  50%  { transform: translateY(-14px) translateX(var(--px, 0px)); }
-  85%  { opacity: .4; }
-  100% { opacity: 0; transform: translateY(-32px) translateX(var(--px, 0px)); }
 }
 
 .intro-content {
@@ -1052,14 +1019,6 @@ a { text-decoration: none; color: inherit; }
   0%   { width: 30px; height: 30px; opacity: .8; border-color: rgba(92,124,250,.65); }
   60%  { opacity: .3; }
   100% { width: 380px; height: 380px; opacity: 0; border-color: rgba(100,116,139,.25); }
-}
-.intro-ring-2 {
-  animation: intro-ring-release-2 1500ms cubic-bezier(.22,1,.36,1) 2500ms forwards;
-}
-@keyframes intro-ring-release-2 {
-  0%   { width: 30px; height: 30px; opacity: .5; border-color: rgba(148,163,184,.5); }
-  60%  { opacity: .22; }
-  100% { width: 460px; height: 460px; opacity: 0; border-color: rgba(148,163,184,.15); }
 }
 #loader::after {
   content: '';
@@ -1160,40 +1119,6 @@ a { text-decoration: none; color: inherit; }
   100% { left: 130%; opacity: 0; }
 }
 
-.intro-tagline { margin-top: 8px; overflow: hidden; }
-.intro-tagline-text {
-  display: inline-block;
-  font-size: .82rem;
-  letter-spacing: .04em;
-  color: var(--text-muted);
-  opacity: 0;
-  transform: translateY(6px);
-  animation: intro-tagline-in 600ms ease-out 2750ms forwards;
-}
-@keyframes intro-tagline-in {
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.intro-progress {
-  position: absolute;
-  bottom: 48px; left: 50%;
-  transform: translateX(-50%);
-  width: 160px; height: 2px;
-  border-radius: 100px;
-  background: rgba(255,255,255,.08);
-  overflow: hidden;
-  opacity: 0;
-  animation: intro-progress-wrap-in 500ms ease-out 200ms forwards;
-}
-@keyframes intro-progress-wrap-in { to { opacity: 1; } }
-.intro-progress-bar {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, var(--cyan), var(--violet));
-  border-radius: 100px;
-  transition: width linear;
-}
-
 @media (max-width: 420px) {
   .intro-icons { transform: scale(.78); margin-bottom: 10px; }
   .intro-glow { width: 320px; height: 320px; }
@@ -1218,16 +1143,8 @@ a { text-decoration: none; color: inherit; }
 .intro-skip .intro-name-text::after { animation: none !important; opacity: 0; }
 .intro-reduced .intro-glow,
 .intro-reduced .intro-ring,
-.intro-reduced .intro-ring-2,
 .intro-skip .intro-glow,
-.intro-skip .intro-ring,
-.intro-skip .intro-ring-2 { animation: none !important; opacity: 0; }
-.intro-reduced .intro-tagline-text,
-.intro-skip .intro-tagline-text { animation: none !important; opacity: 1; transform: none; }
-.intro-reduced .intro-particles,
-.intro-skip .intro-particles,
-.intro-reduced .intro-progress,
-.intro-skip .intro-progress { display: none; }
+.intro-skip .intro-ring { animation: none !important; opacity: 0; }
 .intro-reduced .intro-content,
 .intro-skip .intro-content { animation: none !important; }
 .intro-reduced#loader::after,
